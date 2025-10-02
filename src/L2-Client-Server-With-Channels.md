@@ -10,16 +10,16 @@ un objet messagequeue est une surcouche sur un channel qui permet d'envoyer des 
 
 ## Sending
 
-![alt text](image-2.png)
+![sending automata](image-2.png)
 
-- l'etat L est celui dans lequel on ecrit la taille du message et n est le nombre de bytes lus
-- l'etat M est celui dans lequel on ecrit le message en lui meme et m est le nombre de bytes lus
+- l'etat L est celui dans lequel on ecrit la taille du message et n est le nombre de bytes ecrits
+- l'etat M est celui dans lequel on ecrit le message en lui meme et m est le nombre de bytes ecrits
 
 lorsque la queue est fermee pendant qu' une operation ```send``` est en cours celle ci se termine tout de meme .
 
 ## Receiving
 
-![alt text](image-1.png)
+![receiving automata](image-1.png)
 
 - l'etat L est celui dans lequel on lit la taille du message et n est le nombre de bytes lus
 - l'etat M est celui dans lequel on lit le message en lui meme et m est le nombre de bytes lus
