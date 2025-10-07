@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 package info5.sar.utils;
-
 /**
  * This circular buffer of bytes can be used to pass bytes between two threads:
  * one thread pushing bytes in the buffer and the other pulling bytes from the
