@@ -45,6 +45,10 @@ public class CChannel extends Channel {
       throw new IllegalArgumentException("the range indicated is illegal");
     }
 
+    if(this.disconnected()){
+      throw new IllegalStateException("this channel is already disconnected");
+    }
+
     synchronized(this){
 
       int readed=0;
@@ -77,8 +81,12 @@ public class CChannel extends Channel {
   @Override
   public  int write(byte[] bytes, int offset, int length) {
 
-    if(offset<0 || length<0 || offset >bytes.length || offset+length >bytes.length+1 ){
+    if(offset<0 || length<0 || offset >bytes.length || offset+length >bytes.length+1 || length==0 ){
       throw new IllegalArgumentException("the range indicated is illegal");
+    }
+
+    if(this.disconnected()){
+      throw new IllegalStateException("this channel is already disconnected");
     }
           
     synchronized(remote_end){
@@ -119,6 +127,7 @@ public class CChannel extends Channel {
       }
 
       synchronized(remote_end){
+        remote_end.notifyAll();
         while(!out.empty()){
           try {
             remote_end.wait();
