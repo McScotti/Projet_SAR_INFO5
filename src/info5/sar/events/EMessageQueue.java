@@ -1,11 +1,12 @@
 package info5.sar.events;
 
+import info5.sar.channels.Channel;
+
 public class EMessageQueue extends MessageQueue {
 
     @Override
     void setListener(Listener l) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setListener'");
+        this.listener = l;
     }
 
     @Override
@@ -16,20 +17,41 @@ public class EMessageQueue extends MessageQueue {
 
     @Override
     boolean send(byte[] bytes, int offset, int length) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'send'");
+        if(offset<0 || length<0 || offset >bytes.length || offset+length >bytes.length+1 || length==0 ){
+            throw new IllegalArgumentException("the range indicated is illegal");
+        }
+        WriterAutomata wr = new WriterAutomata(channel, bytes);
+        wr.process();
+        return true;
+    }
+
+    boolean receive(Listener listener){
+        ReaderAutomata rd = new ReaderAutomata(channel, listener);
+        rd.process();
+        return false;
     }
 
     @Override
     void close() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'close'");
+        channel.disconnect();
+        Runnable r = new Runnable() {
+            public void run(){
+                EMessageQueue.this.listener.closed();
+            }
+        };
+        EExecutorManager.get().post(r);
+        
     }
 
     @Override
     boolean closed() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'closed'");
+        return channel.disconnected();
     }
     
+    public EMessageQueue(Channel channel) {
+    	this.channel = channel;
+    }
+    private Channel channel;
+
+    private Listener listener;
 }

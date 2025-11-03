@@ -1,6 +1,6 @@
 package info5.sar.events;
 
-import info5.sar.queues.MessageQueue;
+//import info5.sar.queues.MessageQueue;
 
 public abstract class QueueBroker {
     //abstract QueueBroker(String name);
