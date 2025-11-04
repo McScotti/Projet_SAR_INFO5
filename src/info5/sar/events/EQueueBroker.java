@@ -3,25 +3,28 @@ import info5.sar.channels.*;
 
 public class EQueueBroker extends QueueBroker{
 
+    public EQueueBroker(String name){
+        this.broker = new CBroker(name);
+    }
+
     @Override
     boolean bind(int port, AcceptListener listener) {
     	Task task = new Task("",this.broker);
     	Runnable r = new Runnable() {
     		public void run() {
-    			MessageQueue Mq = new EMessageQueue(broker.accept(port));
+    			MessageQueue Mq = new EMessageQueue(EQueueBroker.this.broker.accept(port));
     			Runnable r = new Runnable(){
                     public void run(){
                         listener.accepted(Mq);
                     }
                 };
-                Executor ex = EExecutorManager.get();
-                ex.post(r);
+                EExecutor.instance().post(r);
                 
     		}
     	};
     	task.start(r);
+        return true;
         
-        throw new UnsupportedOperationException("Unimplemented method 'bind'");
     }
 
     @Override
@@ -35,20 +38,18 @@ public class EQueueBroker extends QueueBroker{
         Task task = new Task("",this.broker);
         Runnable r = new Runnable(){
             public void run(){
-                MessageQueue Mq = new EMessageQueue(broker.connect(name, port));
+                MessageQueue Mq = new EMessageQueue(EQueueBroker.this.broker.connect(name, port));
                 Runnable r = new Runnable() {
                     public void run(){
                         listener.connected(Mq);
                     }
                 };
-                Executor ex = EExecutorManager.get();
-                ex.post(r);
+                EExecutor.instance().post(r);
             }
         };
         task.start(r);
     	
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'connect'");
+        return true;
     }
     
     private Broker broker;

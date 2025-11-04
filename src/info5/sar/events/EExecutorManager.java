@@ -12,9 +12,14 @@ public class EExecutorManager {
             
     }
 
-    public static synchronized EExecutor get(){
-        return ExecutorRegister.getOrDefault(ExecutorRegister, get());
+    public static synchronized EExecutor get() {
+        if (ExecutorRegister.isEmpty()) {
+            return null;
+        }
+        // renvoie le premier élément de la map
+        return ExecutorRegister.values().iterator().next();
     }
+
 
     public static synchronized void post(EExecutor executor){
         if(EExecutorManager.get(executor.name)==null){

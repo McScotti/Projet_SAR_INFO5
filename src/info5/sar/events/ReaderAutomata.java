@@ -3,6 +3,7 @@ package info5.sar.events;
 import java.nio.ByteBuffer;
 
 import info5.sar.channels.Channel;
+import info5.sar.channels.Task;
 
 public class ReaderAutomata {
     
@@ -23,6 +24,7 @@ public class ReaderAutomata {
         this.message_bytes=new byte[2];
         this.length_bytes = new byte[4];
         this.listener=listener;
+        this.rstate = rState.RECEIVE_LENGTH;
     }
 
     public void process(){
@@ -32,55 +34,72 @@ public class ReaderAutomata {
 
             case rState.RECEIVE_LENGTH:
 
-                try {
-                    acc = channel.read(length_bytes, readed, 4-readed);
-                } catch (IllegalStateException e) {
-                    throw new IllegalStateException("the queue is already closed");
-                }
-                if(acc==0){
-                    throw new IllegalStateException("the queue has been closed");
-                }
-                readed+=acc;
-                if(readed==4){
-                    length= ByteBuffer.wrap(length_bytes).getInt();
-                    rstate= rState.RECEIVE_MESSAGE;
-                    message_bytes = new byte[length];
-                    readed=0;
-                }else{
-                    Runnable r = new Runnable() {
-                        public void run(){
-                            ReaderAutomata.this.process();
+                Runnable Rl = new Runnable() {
+                    public void run(){
+                        try {
+                            acc = channel.read(length_bytes, readed, 4-readed);
+                        } catch (IllegalStateException e) {
+                            throw new IllegalStateException("the queue is already closed");
                         }
-                    };
-                    EExecutorManager.get().post(r);
-                }
+                        if(acc==0){
+                            throw new IllegalStateException("the queue has been closed");
+                        }
+                        readed+=acc;
+                        if(readed==4){
+                            length= ByteBuffer.wrap(length_bytes).getInt();
+                            rstate= rState.RECEIVE_MESSAGE;
+                            message_bytes = new byte[length];
+                            readed=0;
+                        }
+                        Runnable r = new Runnable() {
+                            public void run(){
+                                ReaderAutomata.this.process();
+                            }
+                        };
+                        EExecutor.instance().post(r);
+                        
+                    }
+                };
 
-                
+                Thread thread = new Thread(Rl);
+                thread.start();
+                break;
+
+
             case rState.RECEIVE_MESSAGE:
 
-                try {
-                    acc = channel.read(message_bytes, readed, length-readed);
-                } catch (IllegalStateException e) {
-                    throw new IllegalStateException("the queue is already closed");
-                }
-                if(acc==0){
-                    throw new IllegalStateException("the queue has been closed");
-                }
-                readed+=acc;
-                if(readed==length){
-                    rstate= rState.RECEIVE_LENGTH; 
-                    listener.received(message_bytes);
-                    break;
-                    
-                }else{
-                    Runnable r = new Runnable() {
-                        public void run(){
-                            ReaderAutomata.this.process();
+                Runnable Rm = new Runnable() {
+                    public void run(){
+                        try {
+                            acc = channel.read(message_bytes, readed, length-readed);
+                        } catch (IllegalStateException e) {
+                            throw new IllegalStateException("the queue is already closed");
                         }
-                    };
-                    EExecutorManager.get().post(r);
-                }
+                        if(acc==0){
+                            throw new IllegalStateException("the queue has been closed");
+                        }
+                        readed+=acc;
+                        if(readed==length){
+                            rstate= rState.RECEIVE_LENGTH; 
+                            listener.received(message_bytes);
+                            readed=0;
+                            length=0;
+                            
+                        }else{
+                            Runnable r = new Runnable() {
+                                public void run(){
+                                    ReaderAutomata.this.process();
+                                }
+                            };
+                            EExecutor.instance().post(r);
+                        }
+                    }
+                };
+
+                Thread thread2= new Thread(Rm);
+                thread2.start();
                 break;
+
         }
 
     }
@@ -93,17 +112,3 @@ public class ReaderAutomata {
     private rState rstate;
 }
 
-
-// while(readed!=4){
-                //     try {
-                //         acc = channel.read(length_bytes, readed, 4-readed);
-                //     } catch (IllegalStateException e) {
-                //         throw new IllegalStateException("the queue is already closed");
-                //     }
-                //     if(acc==0){
-                //         throw new IllegalStateException("the queue has been closed");
-                //     }
-                //     readed+=acc;
-                // }
-                // length= ByteBuffer.wrap(length_bytes).getInt();
-                // rstate = rState.RECEIVE_MESSAGE;

@@ -7,8 +7,9 @@ public abstract class MessageQueue {
     }
     abstract void setListener(Listener l);
     abstract boolean send(byte[] bytes);
+    abstract boolean receive(Listener l);
     abstract boolean send(byte[] bytes,int offset, int length);
     
-    abstract void close();
+    abstract void close(Listener listener);
     abstract boolean closed();
 }

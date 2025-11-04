@@ -28,18 +28,24 @@ public class EMessageQueue extends MessageQueue {
     boolean receive(Listener listener){
         ReaderAutomata rd = new ReaderAutomata(channel, listener);
         rd.process();
-        return false;
+        return true;
     }
 
     @Override
-    void close() {
-        channel.disconnect();
+    void close(Listener listener) {
         Runnable r = new Runnable() {
             public void run(){
-                EMessageQueue.this.listener.closed();
+                channel.disconnect();
+                listener.closed();
             }
         };
-        EExecutorManager.get().post(r);
+        EExecutor.instance().post(r);
+        // Runnable r = new Runnable() {
+        //     public void run(){
+        //         EMessageQueue.this.listener.closed();
+        //     }
+        // };
+        // EExecutor.instance().post(r);
         
     }
 

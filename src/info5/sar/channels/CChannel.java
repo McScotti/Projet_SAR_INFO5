@@ -42,6 +42,8 @@ public class CChannel extends Channel {
   public int read(byte[] bytes, int offset, int length) {
 
     if(offset<0 || length<0 || offset >bytes.length || offset+length >bytes.length+1 ){
+      System.out.println(offset);
+      System.out.println(bytes.length);
       throw new IllegalArgumentException("the range indicated is illegal");
     }
 

@@ -18,6 +18,7 @@ public class WriterAutomata {
         this.message=message;
         this.channel=channel;
         this.acc=0;
+        this.sstate= sState.SEND_LENGTH;
         this.length=message.length;
         this.length_bytes = ByteBuffer.allocate(4).putInt(length).array();
     }
@@ -29,52 +30,67 @@ public class WriterAutomata {
 
             case sState.SEND_LENGTH:
 
-                try {
-                    acc = channel.write(length_bytes, wrote, 4-wrote);
-                } catch (IllegalStateException e) {
-                    throw new IllegalStateException("the queue is already closed");
-                }
-                if(acc==0){
-                    throw new IllegalStateException("the queue has been closed");
-                }
-                wrote+=acc;
-                if(wrote==4){
-                    sstate= sState.SEND_MESSAGE;
-                    wrote=0;
-                }else{
-                    Runnable r = new Runnable() {
-                        public void run(){
-                            WriterAutomata.this.process();
+                Runnable Rl = new Runnable() {
+                    public void run(){
+                        try {
+                            acc = channel.write(length_bytes, wrote, 4-wrote);
+                        } catch (IllegalStateException e) {
+                            throw new IllegalStateException("the queue is already closed");
                         }
-                    };
-                    EExecutorManager.get().post(r);
-                    break;
-                }
+                        if(acc==0){
+                            throw new IllegalStateException("the queue has been closed");
+                        }
+                        wrote+=acc;
+                        if(wrote==4){
+                            sstate= sState.SEND_MESSAGE;
+                            wrote=0;
+                        }
+                        Runnable r = new Runnable() {
+                            public void run(){
+                                WriterAutomata.this.process();
+                            }
+                        };
+                        EExecutor.instance().post(r);
+                    }
+                };
+                Thread thread = new Thread(Rl);
+                thread.start();
+                break;
+
+                
 
                 
             case sState.SEND_MESSAGE:
 
-                try {
-                    acc = channel.write(message, wrote, length-wrote);
-                } catch (IllegalStateException e) {
-                    throw new IllegalStateException("the queue is already closed");
-                }
-                if(acc==0){
-                    throw new IllegalStateException("the queue has been closed");
-                }
-                wrote+=acc;
-                if(wrote==length){
-                    sstate= sState.SEND_LENGTH; 
-                    break;
-                    
-                }else{
-                    Runnable r = new Runnable() {
-                        public void run(){
-                            WriterAutomata.this.process();
+                Runnable Rm = new Runnable() {
+                    public void run(){
+                        try {
+                            acc = channel.write(message, wrote, length-wrote);
+                        } catch (IllegalStateException e) {
+                            throw new IllegalStateException("the queue is already closed");
                         }
-                    };
-                    EExecutorManager.get().post(r);
-                }
+                        if(acc==0){
+                            throw new IllegalStateException("the queue has been closed");
+                        }
+                        wrote+=acc;
+                        if(wrote==length){
+                            sstate= sState.SEND_LENGTH; 
+                            wrote=0;
+                            
+                        }else{
+                            Runnable r = new Runnable() {
+                                public void run(){
+                                    WriterAutomata.this.process();
+                                }
+                            };
+                            EExecutor.instance().post(r);
+                        }
+                        
+                        
+                    }
+                };
+                Thread thread2 = new Thread(Rm);
+                thread2.start();
                 break;
         }
 
