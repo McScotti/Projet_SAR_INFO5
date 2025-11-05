@@ -11,8 +11,7 @@ public class EMessageQueue extends MessageQueue {
 
     @Override
     boolean send(byte[] bytes) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'send'");
+        return send(bytes,0,bytes.length);
     }
 
     @Override

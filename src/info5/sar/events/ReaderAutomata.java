@@ -81,7 +81,12 @@ public class ReaderAutomata {
                         readed+=acc;
                         if(readed==length){
                             rstate= rState.RECEIVE_LENGTH; 
-                            listener.received(message_bytes);
+                            Runnable r = new Runnable() {
+                                public void run(){
+                                    listener.received(message_bytes);
+                                }
+                            };
+                            EExecutor.instance().post(r);
                             readed=0;
                             length=0;
                             
