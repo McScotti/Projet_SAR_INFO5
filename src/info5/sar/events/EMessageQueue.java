@@ -5,16 +5,19 @@ import info5.sar.channels.Channel;
 public class EMessageQueue extends MessageQueue {
 
     @Override
+    public
     void setListener(Listener l) {
         this.listener = l;
     }
 
     @Override
+    public
     boolean send(byte[] bytes) {
         return send(bytes,0,bytes.length);
     }
 
     @Override
+    public
     boolean send(byte[] bytes, int offset, int length) {
         if(offset<0 || length<0 || offset >bytes.length || offset+length >bytes.length+1 || length==0 ){
             throw new IllegalArgumentException("the range indicated is illegal");
@@ -24,13 +27,14 @@ public class EMessageQueue extends MessageQueue {
         return true;
     }
 
-    boolean receive(Listener listener){
+    public boolean receive(Listener listener){
         ReaderAutomata rd = new ReaderAutomata(channel, listener);
         rd.process();
         return true;
     }
 
     @Override
+    public
     void close(Listener listener) {
         Runnable r = new Runnable() {
             public void run(){
@@ -49,6 +53,7 @@ public class EMessageQueue extends MessageQueue {
     }
 
     @Override
+    public
     boolean closed() {
         return channel.disconnected();
     }

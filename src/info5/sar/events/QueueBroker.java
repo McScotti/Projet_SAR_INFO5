@@ -4,15 +4,15 @@ package info5.sar.events;
 
 public abstract class QueueBroker {
     //abstract QueueBroker(String name);
-    interface AcceptListener {
+    public interface AcceptListener {
         void accepted(MessageQueue queue);
     }
-    abstract boolean bind(int port, AcceptListener listener);
-    abstract boolean unbind(int port);
+    public abstract boolean bind(int port, AcceptListener listener);
+    public abstract boolean unbind(int port);
     
-    interface ConnectListener {
+    public interface ConnectListener {
         void connected(MessageQueue queue);
         void refused();
     }
-    abstract boolean connect(String name, int port,ConnectListener listener);
+    public abstract boolean connect(String name, int port,ConnectListener listener);
 }

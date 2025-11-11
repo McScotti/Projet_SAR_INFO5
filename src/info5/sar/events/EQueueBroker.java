@@ -8,6 +8,7 @@ public class EQueueBroker extends QueueBroker{
     }
 
     @Override
+    public
     boolean bind(int port, AcceptListener listener) {
     	Task task = new Task("",this.broker);
     	Runnable r = new Runnable() {
@@ -28,12 +29,14 @@ public class EQueueBroker extends QueueBroker{
     }
 
     @Override
+    public
     boolean unbind(int port) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'unbind'");
     }
 
     @Override
+    public
     boolean connect(String name, int port, ConnectListener listener) {
         Task task = new Task("",this.broker);
         Runnable r = new Runnable(){
