@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SAR-Multicast" default="test" basedir=".">
+
+    <!-- ========= CONFIGURATION DES CHEMINS ========= -->
+    <property name="src.dir" value="src/info5/sar"/>
+    <property name="test.dir" value="src/info5/sar/test"/>
+    <property name="build.dir" value="build/classes"/>
+    <property name="build.test.dir" value="build/test-classes"/>
+    <property name="report.dir" value="build/reports"/>
+    <property name="lib.dir" value="lib"/>
+
+    <!-- ========= CLASSPATH ========= -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${build.dir}"/>
+    </path>
+
+    <!-- ========= CLEAN ========= -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${build.test.dir}"/>
+        <delete dir="${report.dir}"/>
+    </target>
+
+    <!-- ========= CREATION DES DOSSIERS ========= -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.test.dir}"/>
+        <mkdir dir="${report.dir}"/>
+    </target>
+
+    <!-- ========= COMPILATION DU CODE PRINCIPAL ========= -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <!-- ========= COMPILATION DES TESTS ========= -->
+    <target name="compile-test" depends="compile">
+        <javac srcdir="${test.dir}" destdir="${build.test.dir}" includeantruntime="false">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${build.dir}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <!-- ========= LANCEMENT AUTOMATISÉ DES TESTS JUNIT ========= -->
+    <target name="test" depends="compile-test">
+
+        <mkdir dir="${report.dir}"/>
+
+        <junit printsummary="true" haltonfailure="false">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${build.test.dir}"/>
+                <pathelement location="${build.dir}"/>
+            </classpath>
+
+            <!-- Pour chaque test dans src/test/ -->
+            <batchtest fork="true" todir="${report.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                    <include name="**/Test*.java"/>
+                </fileset>
+            </batchtest>
+
+            <!-- Format des rapports -->
+            <formatter type="xml"/>
+            <formatter type="plain"/>
+        </junit>
+    </target>
+
+</project>
