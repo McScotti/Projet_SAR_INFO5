@@ -13,6 +13,6 @@ public class Message {
         return timestamp;
     }
 
-    private String content;
+    public String content;
     private Timestamp timestamp;
 }

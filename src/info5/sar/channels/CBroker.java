@@ -18,6 +18,7 @@ package info5.sar.channels;
 import java.util.HashMap;
 import java.util.Map;
 
+import info5.sar.multicast.Peer;
 import info5.sar.utils.Rdv;
 
 

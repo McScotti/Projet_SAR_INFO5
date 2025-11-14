@@ -8,12 +8,16 @@ public class PFD {
 
     }
 
-    public static boolean verify_my_acks(List<Integer> ack_list){
+    public static synchronized boolean verify_my_acks(List<Integer> ack_list){
         if (new HashSet<>(l).equals(new HashSet<>(ack_list))) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public static synchronized void dead(int id){
+        l.remove(id);
     }
 
 
