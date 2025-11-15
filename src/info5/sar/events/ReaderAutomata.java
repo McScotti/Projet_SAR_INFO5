@@ -19,7 +19,7 @@ public class ReaderAutomata {
     public ReaderAutomata(Channel channel, EMessageQueue.Listener listener ){
         this.readed=0;
         this.channel=channel;
-        this.acc=0;
+        //this.acc=0;
         this.length=0;
         this.message_bytes=new byte[2];
         this.length_bytes = new byte[4];
@@ -50,6 +50,7 @@ public class ReaderAutomata {
                             rstate= rState.RECEIVE_MESSAGE;
                             message_bytes = new byte[length];
                             readed=0;
+                            System.out.println("j'ai lu une taille de "+ length);
                         }
                         Runnable r = new Runnable() {
                             public void run(){

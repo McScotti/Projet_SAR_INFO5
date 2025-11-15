@@ -13,7 +13,6 @@ public class EMessageQueue extends MessageQueue {
     @Override
     public
     boolean send(byte[] bytes) {
-        System.out.println("minimum wr");
         return send(bytes,0,bytes.length);
     }
 

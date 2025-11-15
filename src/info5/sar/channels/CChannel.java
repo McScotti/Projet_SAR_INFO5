@@ -62,6 +62,7 @@ public class CChannel extends Channel {
           readed++;
         } catch (IllegalStateException e) {
           if(readed!=0){
+            //System.out.println("je debloque une ecriture");
             return readed;
           }else{
             try {
@@ -105,6 +106,7 @@ public class CChannel extends Channel {
             return wrote;
           }else{
             try {
+              //System.out.print("je me bloque en ecriture ");
               remote_end.wait();
               //continue;
             } catch (InterruptedException e1) {

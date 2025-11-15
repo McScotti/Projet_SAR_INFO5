@@ -5,6 +5,20 @@ import info5.sar.events.QueueBroker;
 
 public class TestClientServer {
     public static void main(String[] args) throws Exception {
+
+
+        int byteSize = 200;
+        // Crée un tableau de 256 octets, initialisés à 0 (qui correspond au caractère null \0 ou à un espace selon l'usage)
+        byte[] bytes = new byte[byteSize];
+
+        String result;
+        
+        // Remplissage avec un caractère sûr (par exemple, l'espace ' ')
+        for (int i = 0; i < byteSize; i++) {
+            bytes[i] = ' '; // Le caractère espace prend 1 octet en Latin-1
+        }
+        result = (new String(bytes, "ISO-8859-1"))+"bonjour toi";
+        
         
         Runnable r = new Runnable() {
             public void run(){
@@ -25,7 +39,7 @@ public class TestClientServer {
                             public void received(byte[] msg) {
                                 String message = new String(msg);
                                 System.out.println("[SERVER] Reçu : " + message);
-                                queue.send("ACKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK".getBytes(),0,"ACKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK".getBytes().length);
+                                queue.send(result.getBytes(),0,result.getBytes().length);
                             }
 
                             @Override
@@ -41,7 +55,7 @@ public class TestClientServer {
                     @Override
                     public void connected(MessageQueue queue) {
                         System.out.println("[CLIENT] Connecté au serveur !");
-                        queue.send("Hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo".getBytes(),0,"Hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo".getBytes().length);
+                        queue.send(result.getBytes(),0,result.getBytes().length);
                         queue.receive(new MessageQueue.Listener() {
                             @Override
                             public void received(byte[] msg) {

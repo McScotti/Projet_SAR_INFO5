@@ -43,10 +43,10 @@ public class Test {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
-                peer0.multicast("Message " + 0 + " from Peer " + 0,0);
-                peer1.multicast("Message " + 1 + " from Peer " + 1,1);
-                peer2.multicast("Message " + 2 + " from Peer " + 2,2);
+                peer1.multicast(" ", 1);
+                //peer0.multicast("Message " + 0 + " from Peer " + 0,0);
+                //peer1.multicast("Message " + 1 + " from Peer " + 1,1);
+                //peer2.multicast("Message " + 2 + " from Peer " + 2,2);
             }
             
         };

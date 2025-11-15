@@ -44,6 +44,7 @@ public class WriterAutomata {
                         if(wrote==4){
                             sstate= sState.SEND_MESSAGE;
                             wrote=0;
+                            System.out.print("j ai ecrit uen taille"+ length);
                         }
                         Runnable r = new Runnable() {
                             public void run(){

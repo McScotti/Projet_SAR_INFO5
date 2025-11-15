@@ -44,5 +44,7 @@ public class Timestamp implements Comparable<Timestamp> , Serializable {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    
 }
 
