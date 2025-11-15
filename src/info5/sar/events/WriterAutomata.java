@@ -76,7 +76,6 @@ public class WriterAutomata {
                         if(wrote==length){
                             sstate= sState.SEND_LENGTH; 
                             wrote=0;
-                            
                         }else{
                             Runnable r = new Runnable() {
                                 public void run(){

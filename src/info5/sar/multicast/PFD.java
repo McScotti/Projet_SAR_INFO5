@@ -1,5 +1,6 @@
 package info5.sar.multicast;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class PFD {
         l.remove(id);
     }
 
+    public static synchronized void insert(int id){
+        l.add(id);
+    }
 
-    static List<Integer>  l ;
+
+    static List<Integer>  l= new ArrayList<>() ;
 }

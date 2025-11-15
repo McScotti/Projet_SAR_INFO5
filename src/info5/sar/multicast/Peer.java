@@ -6,25 +6,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import info5.sar.channels.Broker;
-import info5.sar.channels.Task;
+import info5.sar.events.EExecutor;
+import info5.sar.events.EMessageQueue;
 import info5.sar.events.EQueueBroker;
 import info5.sar.events.MessageQueue;
 import info5.sar.events.QueueBroker;
 
 public class Peer extends Task implements TotallyOrderedMulticast{
 
-    public Peer(String name, Broker broker, int id, int Number_of_peer) {
-        super(name, broker);
-        queueBroker= new EQueueBroker(broker.getName()); 
-        bootstrap_bind(queueBroker);
-        for(int i=0;i<Number_of_peer;i++){
+    private int neighbors;
+
+    public Peer(String name, QueueBroker queueBroker, int id, int Number_of_peer) {
+        super(name, queueBroker);
+        
+        this.queueBroker= queueBroker;
+        received_ack = new HashMap<>();
+        received_messages = new HashMap<>();
+        queues = new ArrayList<>();
+        lamportClock = new LamportClock();
+        this.id = id;
+        this.neighbors=Number_of_peer-1;
+
+
+        bootstrap_bind(queueBroker,id);
+        int i=id+1;
+        while(i<Number_of_peer){
             if(i!=id){
-                queueBroker.connect("peer"+i, 1000, new QueueBroker.ConnectListener() {
+                int j = i;
+                queueBroker.connect("peer"+i, 1000+i+id, new QueueBroker.ConnectListener() {
 
                     @Override
                     public void connected(MessageQueue queue) {
+                        System.out.println("J ai reussi une connexion"+id + "sur" +j);
                         queues.add(queue);
+                        //System.out.println(id + ""+ queues.size());
                         listen(queue);
                     }
 
@@ -36,9 +51,13 @@ public class Peer extends Task implements TotallyOrderedMulticast{
                     
                 });
             }
+            i++;
         }
+
+        PFD.insert(id);
     }
 
+    
     @Override
     public void set(Listener l) {
         // TODO Auto-generated method stub
@@ -46,35 +65,52 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     }
 
     @Override
-    public void multicast(String msg) {
-        Message message = new Message(msg);
-        Timestamp timestamp = new Timestamp(this.id, lamportClock.tick());
-        message.set_timestamp(timestamp);
-        byte[] b = MessageSerializer.serialize(message);
-        // for (int i=0;i<queues.length;i++){
-        //     queues[i].send(b);
-        // }
-        for(MessageQueue q : queues){
-            q.send(b);
+    public void multicast(String msg,int id) {
+        if(queues.size()<neighbors){
+            Runnable R = new Runnable() {
+
+                @Override
+                public void run() {
+                    Peer.this.multicast(msg, id);
+                }
+            };
+            EExecutor.instance().post(R);
+        }else{
+            Message message = new Message(msg);
+            Timestamp timestamp = new Timestamp(this.id, lamportClock.tick());
+            message.set_timestamp(timestamp);
+            byte[] b = MessageSerializer.serialize(message);
+            queues.get(0).send(b);
+            for(MessageQueue q : queues){
+                q.send(b);
+                System.out.println("j'ai  ecrit pour un "+id);
+            } 
         }
         
     }
 
     public void listen(MessageQueue queue){
+        System.out.println("j'ai recu un messageeeeee");
         queue.receive(new MessageQueue.Listener() {
 
             @Override
             public void received(byte[] msg) {
                 Object message = MessageSerializer.deserialize(msg);
+                //System.out.println("j'ai recu un message");
                 if(message instanceof Timestamp){
                     Timestamp timestamp = (Timestamp)message;
                     received_ack.get(timestamp).add(timestamp.get_id());
+                    System.out.println("j'ai recu un message");
                     deliver();
+                    System.out.println("j'ai delivre un message");
+                    listen(queue);
                 }else if(message instanceof Message){
                     Message m = (Message)message;
                     received_ack.put(m.get_timestamp(), new ArrayList<Integer>());
                     received_messages.put(m.get_timestamp(), m);
+                    lamportClock.update(m.get_timestamp().get_clock());
                     deliver();
+                    listen(queue);
                 }
                 
             }
@@ -88,23 +124,36 @@ public class Peer extends Task implements TotallyOrderedMulticast{
         });
     }
 
-    public void bootstrap_bind(QueueBroker queueBroker){
-        queueBroker.bind(1000, new QueueBroker.AcceptListener() {
+    public void bootstrap_bind(QueueBroker queueBroker, int i){
+        
+
+        for (int j=0;j<i;j++){
+            queueBroker.bind(1000+j+i, new QueueBroker.AcceptListener() {
 
             @Override
             public void accepted(MessageQueue queue) {
+                System.out.println("j'ai recu quelqu'un " + i);
+                synchronized(queues){
+                    queues.add(queue);
+                    queues.notifyAll();
+                }
+                listen(queue);
+                //System.out.println(id + ""+ queues.size());
+
                 //listen(queue);
-                bootstrap_bind(queueBroker);
             }
             
         });
+        }
     }
 
 
     public void deliver(){
         Timestamp mintTimestamp = Collections.min(received_messages.keySet());
         if(PFD.verify_my_acks(received_ack.get(mintTimestamp))){
-
+            System.out.println(received_messages.get(mintTimestamp).content);
+        }else{
+            System.out.println("no deliver");
         }
         
     }

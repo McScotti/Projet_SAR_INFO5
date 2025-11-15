@@ -15,7 +15,7 @@ public class EExecutor extends Executor{
 
     final private static EExecutor instance = new EExecutor("scott");
     
-    static EExecutor instance(){
+    public static EExecutor instance(){
         return instance;
     }
 
