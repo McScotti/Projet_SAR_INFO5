@@ -1,6 +1,8 @@
 package info5.sar.multicast;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     public Message(String content){
         this.content=content;
     }

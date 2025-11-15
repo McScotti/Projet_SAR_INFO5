@@ -1,22 +1,23 @@
 package info5.sar.multicast;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Timestamp implements Comparable<Timestamp> {
+public class Timestamp implements Comparable<Timestamp> , Serializable {
     private int id;
-    private int lamportClock;
+    private int clock;
 
-    public Timestamp(int id,int lamportClock){
+    public Timestamp(int id,int clock){
         this.id=id;
-        this.lamportClock=lamportClock;
+        this.clock=clock;
     }
 
 
     @Override
     public int compareTo(Timestamp o) {
-        if(this.lamportClock>o.lamportClock){
+        if(this.clock>o.clock){
             return 1;
-        }else if(this.lamportClock<o.lamportClock){
+        }else if(this.clock<o.clock){
             return -1;
         }else{
             return Integer.compare(this.id, o.id);
@@ -25,6 +26,10 @@ public class Timestamp implements Comparable<Timestamp> {
 
     int get_id(){
         return id;
+    }
+
+    int get_clock(){
+        return clock;
     }
 
     @Override

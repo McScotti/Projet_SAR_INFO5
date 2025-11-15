@@ -13,13 +13,17 @@ public class EQueueBroker extends QueueBroker{
     	Task task = new Task("",this.broker);
     	Runnable r = new Runnable() {
     		public void run() {
-    			MessageQueue Mq = new EMessageQueue(EQueueBroker.this.broker.accept(port));
-    			Runnable r = new Runnable(){
-                    public void run(){
-                        listener.accepted(Mq);
-                    }
-                };
-                EExecutor.instance().post(r);
+    			try {
+                    MessageQueue Mq = new EMessageQueue(EQueueBroker.this.broker.accept(port));
+                    Runnable r = new Runnable(){
+                        public void run(){
+                            listener.accepted(Mq);
+                        }
+                    };
+                    EExecutor.instance().post(r);
+                } catch (IllegalArgumentException e) {
+                    System.out.print(broker.getName()+" faute sur "+port);
+                }
                 
     		}
     	};

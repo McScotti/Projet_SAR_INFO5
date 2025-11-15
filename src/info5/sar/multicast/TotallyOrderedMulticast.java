@@ -6,5 +6,5 @@ public interface TotallyOrderedMulticast {
     }
 
     void set(Listener l);
-    void multicast(String message);
+    void multicast(String message,int id);
 }
