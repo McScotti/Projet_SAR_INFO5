@@ -31,6 +31,8 @@ Un peer représente un participant au groupe. Chaque instance de Peer contient :
     * received_ack : Map<Timestamp,List<Integer>> : Garde la liste des ACK reçus pour chaque message.
     * received_messages : Map<Timestamp,Message> : Hold-back queue triée par timestamp.
 
+Le Peer rejoint directement un groupe dédié à sa création puis se met en écoute des possible connexions.
+
 L’EventPump garantit :
 * un traitement séquentiel et sans course critique
 * une logique applicative sans verrou
@@ -66,16 +68,29 @@ Lorsqu'un peer veut diffuser le message au groupe :
 4. Diffusion sur tous les voisins via MessageQueue.send()
 
 ```
-public void multicast(String msg) {
-    Message message = new Message(msg);
-    Timestamp timestamp = new Timestamp(this.id, lamportClock.tick());
-    message.set_timestamp(timestamp);
-    byte[] b = MessageSerializer.serialize(message);
-    for(MessageQueue q : queues){
-        q.send(b);
-    }
+public void multicast(String msg,int id) {
+        if(queues.size()<neighbors){
+            Runnable R = new Runnable() {
+
+                @Override
+                public void run() {
+                    Peer.this.multicast(msg, id);
+                }
+            };
+            EExecutor.instance().post(R);
+        }else{
+            Message message = new Message(msg);
+            Timestamp timestamp = new Timestamp(this.id, lamportClock.tick());
+            message.set_timestamp(timestamp);
+            byte[] b = MessageSerializer.serialize(message);
+            queues.get(0).send(b);
+            for(MessageQueue q : queues){
+                q.send(b);
+                System.out.println("j'ai  ecrit pour un "+id);
+            } 
+        }
         
-}
+    }
 ```
 
 ## Reception des messages multicast
@@ -87,24 +102,39 @@ Chaque MessageQueue installe un listener :
 
 ```
 public void listen(MessageQueue queue){
-    queue.receive(new MessageQueue.Listener() {
+        System.out.println("j'ai recu un messageeeeee");
+        queue.receive(new MessageQueue.Listener() {
 
-        @Override
-        public void received(byte[] msg) {
-            Object message = MessageSerializer.deserialize(msg);
-            if(message instanceof Timestamp){
-                Timestamp timestamp = (Timestamp)message;
-                received_ack.get(timestamp).add(timestamp.get_id());
-                deliver();
-            }else if(message instanceof Message){
-                Message m = (Message)message;
-                received_ack.put(m.get_timestamp(), new ArrayList<Integer>());
-                received_messages.put(m.get_timestamp(), m);
-                deliver();
+            @Override
+            public void received(byte[] msg) {
+                Object message = MessageSerializer.deserialize(msg);
+                //System.out.println("j'ai recu un message");
+                if(message instanceof Timestamp){
+                    Timestamp timestamp = (Timestamp)message;
+                    received_ack.get(timestamp).add(timestamp.get_id());
+                    System.out.println("j'ai recu un message");
+                    deliver();
+                    System.out.println("j'ai delivre un message");
+                    listen(queue);
+                }else if(message instanceof Message){
+                    Message m = (Message)message;
+                    received_ack.put(m.get_timestamp(), new ArrayList<Integer>());
+                    received_messages.put(m.get_timestamp(), m);
+                    lamportClock.update(m.get_timestamp().get_clock());
+                    deliver();
+                    listen(queue);
+                }
+                
             }
-        }
-    });
-}
+
+            @Override
+            public void closed() {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'closed'");
+            }
+            
+        });
+    }
 ```
 
 **Accusés de réception (ACK)**
@@ -136,6 +166,12 @@ La fonction verify_my_acks() vérifie que tous les membres du groupe ont accusé
 Nous avons réaliser un test de charge verifiant la connexions entre les peer et l'envoie/reception des messages
 
 Pour lancer automatiquement les tests via ant : 
-``` ant tests``` 
+- Pour valider l'exécution de la couche Broker/Channel
+``` ant run-test``` 
 
+- Pour valider le modèle évenementiel
+``` ant run-event ```
+
+- Pour valider le multicast
+``` ant run-multicast ```
 

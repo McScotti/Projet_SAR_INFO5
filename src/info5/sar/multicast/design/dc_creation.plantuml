@@ -1,4 +1,4 @@
-@startuml
+@startuml Graphe d'objet envoie de message
 left to right direction
 
 circle peer1
