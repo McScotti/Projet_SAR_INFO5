@@ -20,7 +20,7 @@ Implémentation du Totally Ordered Multicast (TOM) basée sur les MessageQueues.
 
 ## Creaton du groupe
 
-![alt text](image.png)
+![Design de la creation de groupe de multicast](creation.png)
 
 **Peer — un objet Peer** :
 Un peer représente un participant au groupe. Chaque instance de Peer contient :
@@ -51,6 +51,10 @@ Le Coordinator est un composant de test unitaire. IL a pour rôle de
 C’est cet outil qui permet de valider expérimentalement l’implémentation du TOM.
 
 ## Envoie des messages multicast
+
+![Design de l'envoie des messages dans le groupe](envoie.png)
+
+![alt text](envoie2.png)
 
 Chaque Peer reçoit tous les messages (y compris les siens). La pompe d’événements garantit un traitement séquentiel, sans thread-safety complexe.
 Les ACKs (ici, assurer uniquement avec les timestamp) assurent la confirmation totale : on ne livre que lorsque tous ont vu le message.

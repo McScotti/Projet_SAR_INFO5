@@ -1,0 +1,21 @@
+@startuml Design de création du groupe
+left to right direction
+
+circle coordonatteur
+circle peer1
+circle peer2
+circle peer3
+circle peer4
+
+peer1 --> coordonatteur
+peer2 --> coordonatteur
+peer3 --> coordonatteur
+peer4 --> coordonatteur
+
+peer1 <..> peer2
+peer1 <..> peer3
+peer1 <..> peer4
+peer2 <..> peer3
+peer2 <..> peer4
+peer3 <..> peer4
+@enduml
