@@ -3,5 +3,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="private"/>
 	<classpathentry kind="src" path="public"/>
+	<classpathentry kind="src" path="info5/sar/test"/>
+	<classpathentry kind="src" path="info5/sar/events"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SAR-Multicast" default="test" basedir=".">
+
+    <!-- ========= CHEMINS ========= -->
+    <property name="src.dir" value="src/info5/sar"/>
+    <property name="test.dir" value="src/info5/sar/test"/>
+    <property name="build.dir" value="build/classes"/>
+    <property name="build.test.dir" value="build/test-classes"/>
+    <property name="report.dir" value="build/reports"/>
+    <property name="lib.dir" value="lib"/>
+
+    <!-- ========= CLASSPATH ========= -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+        <pathelement location="${build.dir}"/>
+    </path>
+
+    <!-- ========= CLEAN ========= -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${build.test.dir}"/>
+        <delete dir="${report.dir}"/>
+    </target>
+
+    <!-- ========= INIT ========= -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.test.dir}"/>
+        <mkdir dir="${report.dir}"/>
+    </target>
+
+    <!-- ========= COMPILATION DU CODE ========= -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <!-- ========= COMPILATION DES TESTS ========= -->
+    <target name="compile-test" depends="compile">
+        <javac srcdir="${test.dir}" destdir="${build.test.dir}" includeantruntime="false">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${build.dir}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <!-- test -->
+    <target name="run-event" depends="compile">
+        <java classname="info5.sar.events.TestClientServer" fork="true">
+            <classpath>
+                <pathelement location="${build.dir}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-test" depends="compile">
+        <java classname="info5.sar.test.Test" fork="true">
+            <classpath>
+                <pathelement location="${build.dir}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-multicast" depends="compile">
+        <java classname="info5.sar.multicast.Test" fork="true">
+            <classpath>
+                <pathelement location="${build.dir}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <!-- ========= TESTS ========= -->
+    <target name="run-junit-test" depends="compile-test">
+        <junit printsummary="true" haltonfailure="false">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${build.dir}"/>
+                <pathelement location="${build.test.dir}"/>
+            </classpath>
+
+            <batchtest fork="true" todir="${report.dir}">
+                <fileset dir="${build.test.dir}">
+                    <include name="**/*Test.class"/>
+                </fileset>
+            </batchtest>
+
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+        </junit>
+    </target>
+
+</project>

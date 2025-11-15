@@ -1,0 +1,36 @@
+@startuml Graphe d'objet envoie de message
+left to right direction
+
+circle peer1
+circle peer2
+circle eventPump
+
+circle MQ10
+circle MQ11
+circle MQ12
+circle MQ20
+circle MQ21
+circle MQ22
+
+peer1 --> MQ10
+peer1 --> MQ11
+peer1 --> MQ12
+
+peer2 --> MQ20
+peer2 --> MQ21
+peer2 --> MQ22
+
+MQ10 <..> MQ11
+MQ12 <..> MQ22
+MQ20 <..> MQ21
+
+peer1 .[#9f9f9f].> eventPump
+peer2 .[#9f9f9f].> eventPump
+MQ10 .[#9f9f9f].> eventPump
+MQ11 .[#9f9f9f].> eventPump
+MQ12 .[#9f9f9f].> eventPump
+MQ20 .[#9f9f9f].> eventPump
+MQ21 .[#9f9f9f].> eventPump
+MQ22 .[#9f9f9f].> eventPump
+
+@enduml

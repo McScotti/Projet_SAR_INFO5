@@ -1,0 +1,20 @@
+@startuml Envoie et recption des messages
+entity peer1
+entity peer2
+entity peer3
+entity eventPump
+
+activate eventPump
+
+peer1 -[#9f9f9f]-> eventPump
+peer1 -> peer1 : (MSG, ts)
+peer1 -> peer2 : (MSG, ts)
+note over peer2 : set TS
+
+peer1 -> peer3 : (MSG, ts)
+
+peer2 --> peer1 : (ACK, ts)
+peer2 --> peer3 : (ACK, ts)
+peer3 --> peer1 : (ACK, ts)
+peer3 --> peer2 : (ACK, ts)
+@enduml
