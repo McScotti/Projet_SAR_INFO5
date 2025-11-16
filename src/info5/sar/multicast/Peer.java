@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import info5.sar.events.EExecutor;
+import info5.sar.events.EMessageQueue;
+import info5.sar.events.EQueueBroker;
 import info5.sar.events.MessageQueue;
 import info5.sar.events.QueueBroker;
 
@@ -34,11 +36,8 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
                     @Override
                     public void connected(MessageQueue queue) {
-                        synchronized(queues){
-                            queues.add(queue);
-                        }
-                        //System.out.println(id + ""+ queues.size());
-                        //listen(queue);
+                        queues.add(queue);
+                        listen(queue);
                     }
 
                     @Override
@@ -53,7 +52,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
         }
 
         PFD.insert(id,this);
-        Listen();
     }
 
     
@@ -70,7 +68,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
                 @Override
                 public void run() {
-                    System.out.println("multicast postponed");
                     Peer.this.multicast(msg, id);
                 }
             };
@@ -82,7 +79,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             byte[] b = MessageSerializer.serialize(message);
             //queues.get(0).send(b);
             for(MessageQueue q : queues){
-                System.out.println(b.length);
                 q.send(b);
                 //System.out.println("j'ai  ecrit pour un "+id);
             } 
@@ -126,10 +122,8 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
             @Override
             public void accepted(MessageQueue queue) {
-                synchronized(queues){
-                    queues.add(queue);
-                }
-                //listen(queue);
+                queues.add(queue);
+                listen(queue);
             }
             
         });
@@ -137,13 +131,17 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     }
 
 
-
-
     public void deliver(){
         Timestamp mintTimestamp = Collections.min(received_messages.keySet());
         if(PFD.verify_my_acks(received_ack.get(mintTimestamp))){
-            System.out.println(received_messages.get(mintTimestamp).content);
+            System.out.println(received_messages.get(mintTimestamp).content + " "+id);
+            received_messages.remove(mintTimestamp);
+            received_ack.remove(mintTimestamp);
         }else{
+            String h = "";
+            for(Integer i:received_ack.get(mintTimestamp)){
+                h = h+" "+i;
+            }
         }
         
     }
@@ -168,10 +166,9 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
     public void handleACK(MessageACK ack){
         if(received_messages.get(ack.get_timestamp())!=null){
-            if(ack.get_id()!=Peer.this.id){
                 received_ack.get(ack.get_timestamp()).add(ack.get_id());
                 deliver();
-            }
+            
         }else{
             Runnable R = new Runnable() {
 
@@ -183,6 +180,9 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             };
             EExecutor.instance().post(R);
         }
+        // received_ack.get(ack.get_timestamp()).add(ack.get_id());
+        // System.out.println("j'ai recu un message");
+        // deliver();
     }
 
     public void handleMessage(Message m){
@@ -196,24 +196,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
         received_messages.put(m.get_timestamp(), m);
         lamportClock.update(m.get_timestamp().get_clock());
         deliver();
-    }
-
-    public void Listen(){
-        if(queues.size()==neighbors){
-            for(MessageQueue q: queues){
-                listen(q);
-            }
-        }else{
-            Runnable R = new Runnable() {
-
-                @Override
-                public void run() {
-                    Listen();
-                }
-                
-            };
-            EExecutor.instance().post(R);
-        }
     }
 
     private Map<Timestamp,List<Integer>> received_ack;

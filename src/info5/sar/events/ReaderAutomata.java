@@ -16,18 +16,21 @@ public class ReaderAutomata {
     private EMessageQueue.Listener listener;
 
 
-    public ReaderAutomata(Channel channel, EMessageQueue.Listener listener ){
+    public ReaderAutomata(Channel channel){
         this.readed=0;
         this.channel=channel;
-        this.acc=0;
+        this.reading=false;
+        //this.acc=0;
         this.length=0;
         this.message_bytes=new byte[2];
         this.length_bytes = new byte[4];
-        this.listener=listener;
         this.rstate = rState.RECEIVE_LENGTH;
     }
 
-    public void process(){
+    public void process(  EMessageQueue.Listener listener )
+    {
+        this.reading = true;
+        this.listener=listener;
 
 
         switch (rstate) {
@@ -53,7 +56,7 @@ public class ReaderAutomata {
                         }
                         Runnable r = new Runnable() {
                             public void run(){
-                                ReaderAutomata.this.process();
+                                ReaderAutomata.this.process(listener);
                             }
                         };
                         EExecutor.instance().post(r);
@@ -81,19 +84,21 @@ public class ReaderAutomata {
                         readed+=acc;
                         if(readed==length){
                             rstate= rState.RECEIVE_LENGTH; 
+                            readed=0;
+                            length=0;
+                            ReaderAutomata.this.length_bytes = new byte[4];
+                            reading=false;
                             Runnable r = new Runnable() {
                                 public void run(){
                                     listener.received(message_bytes);
                                 }
                             };
                             EExecutor.instance().post(r);
-                            readed=0;
-                            length=0;
                             
                         }else{
                             Runnable r = new Runnable() {
                                 public void run(){
-                                    ReaderAutomata.this.process();
+                                    ReaderAutomata.this.process(listener);
                                 }
                             };
                             EExecutor.instance().post(r);
@@ -115,5 +120,10 @@ public class ReaderAutomata {
 
     private sState sstate;
     private rState rstate;
-}
 
+    private boolean reading;
+
+    public synchronized boolean get_reading(){
+        return reading;
+    }
+}

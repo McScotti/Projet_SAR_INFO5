@@ -3,7 +3,7 @@ package info5.sar.events;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Executor {
+public abstract class Executor extends Thread{
     List<Runnable> queue;
     
     Executor(){
