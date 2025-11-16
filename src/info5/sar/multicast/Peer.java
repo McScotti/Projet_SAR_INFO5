@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import info5.sar.events.EExecutor;
-import info5.sar.events.EMessageQueue;
-import info5.sar.events.EQueueBroker;
 import info5.sar.events.MessageQueue;
 import info5.sar.events.QueueBroker;
 
@@ -32,12 +30,13 @@ public class Peer extends Task implements TotallyOrderedMulticast{
         int i=id+1;
         while(i<Number_of_peer){
             if(i!=id){
-                int j = i;
                 queueBroker.connect("peer"+i, 1000+i+id, new QueueBroker.ConnectListener() {
 
                     @Override
                     public void connected(MessageQueue queue) {
-                        queues.add(queue);
+                        synchronized(queues){
+                            queues.add(queue);
+                        }
                         //System.out.println(id + ""+ queues.size());
                         //listen(queue);
                     }
@@ -127,7 +126,9 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
             @Override
             public void accepted(MessageQueue queue) {
-                queues.add(queue);
+                synchronized(queues){
+                    queues.add(queue);
+                }
                 //listen(queue);
             }
             
