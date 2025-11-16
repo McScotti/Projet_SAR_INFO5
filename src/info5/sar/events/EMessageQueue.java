@@ -1,5 +1,7 @@
 package info5.sar.events;
 
+import java.util.Arrays;
+
 import info5.sar.channels.Channel;
 
 public class EMessageQueue extends MessageQueue {
@@ -22,14 +24,40 @@ public class EMessageQueue extends MessageQueue {
         if(offset<0 || length<0 || offset >bytes.length || offset+length >bytes.length+1 || length==0 ){
             throw new IllegalArgumentException("the range indicated is illegal");
         }
-        WriterAutomata wr = new WriterAutomata(channel, bytes);
-        wr.process();
+        if(this.wr.get_sending()){
+            Runnable R = new Runnable() {
+
+                @Override
+                public void run() {
+                    EMessageQueue.this.send(bytes, offset, length);
+                }
+                
+            };
+
+            EExecutor.instance().post(R);
+        }else{
+            wr.process(Arrays.copyOfRange(bytes, offset, offset+length));
+        }
+        //WriterAutomata wr = new WriterAutomata(channel, bytes);
         return true;
     }
 
     public boolean receive(Listener listener){
-        ReaderAutomata rd = new ReaderAutomata(channel, listener);
-        rd.process();
+        if(this.rd.get_reading()){
+            Runnable R = new Runnable() {
+
+                @Override
+                public void run() {
+                   EMessageQueue.this.receive(listener);
+                }
+                
+            };
+            EExecutor.instance().post(R);
+        }else{
+            //ReaderAutomata rd = new ReaderAutomata(channel);
+            rd.process(listener);
+        }
+        
         return true;
     }
 
@@ -60,8 +88,13 @@ public class EMessageQueue extends MessageQueue {
     
     public EMessageQueue(Channel channel) {
     	this.channel = channel;
+        this.wr= new WriterAutomata(channel);
+        this.rd = new ReaderAutomata(channel);
     }
     private Channel channel;
 
     private Listener listener;
+
+    private WriterAutomata wr;
+    private ReaderAutomata rd;
 }

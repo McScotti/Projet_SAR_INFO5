@@ -9,22 +9,23 @@ public class WriterAutomata {
     private int acc;
     private int length;
     private byte[] length_bytes;
-    private byte[] message;
+    //private byte[] message;
     private Channel channel;
 
 
-    public WriterAutomata(Channel channel,byte[] message ){
+    public WriterAutomata(Channel channel ){
         this.wrote=0;
-        this.message=message;
         this.channel=channel;
         this.acc=0;
         this.sstate= sState.SEND_LENGTH;
-        this.length=message.length;
-        this.length_bytes = ByteBuffer.allocate(4).putInt(length).array();
+        sending=false;
     }
 
-    public void process(){
+    public void process(byte[] message){
 
+        sending=true;
+        this.length=message.length;
+        this.length_bytes = ByteBuffer.allocate(4).putInt(length).array();
 
         switch (sstate) {
 
@@ -48,7 +49,7 @@ public class WriterAutomata {
                         }
                         Runnable r = new Runnable() {
                             public void run(){
-                                WriterAutomata.this.process();
+                                WriterAutomata.this.process(message);
                             }
                         };
                         EExecutor.instance().post(r);
@@ -77,10 +78,11 @@ public class WriterAutomata {
                         if(wrote==length){
                             sstate= sState.SEND_LENGTH; 
                             wrote=0;
+                            sending=false;
                         }else{
                             Runnable r = new Runnable() {
                                 public void run(){
-                                    WriterAutomata.this.process();
+                                    WriterAutomata.this.process(message);
                                 }
                             };
                             EExecutor.instance().post(r);
@@ -102,4 +104,10 @@ public class WriterAutomata {
 
     private sState sstate;
     private rState rstate;
+
+    private boolean sending;
+
+    public synchronized boolean get_sending(){
+        return sending;
+    }
 }

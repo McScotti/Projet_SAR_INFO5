@@ -13,6 +13,7 @@ public class Test {
                 QueueBroker queueBroker0 = new EQueueBroker("peer0");
                 QueueBroker queueBroker1 = new EQueueBroker("peer1");
                 QueueBroker queueBroker2 = new EQueueBroker("peer2");
+                QueueBroker queueBroker3 = new EQueueBroker("peer3");
 
                 // Runnable R = new Runnable() {
                 //     @Override
@@ -33,9 +34,10 @@ public class Test {
                 // };
                 
 
-                Peer peer0 = new Peer("peer0", queueBroker0, 0, 3);
-                Peer peer1 = new Peer("peer1", queueBroker1, 1, 3);
-                Peer peer2 = new Peer("peer2", queueBroker2, 2, 3);
+                Peer peer0 = new Peer("peer0", queueBroker0, 0, 4);
+                Peer peer1 = new Peer("peer1", queueBroker1, 1, 4);
+                Peer peer2 = new Peer("peer2", queueBroker2, 2, 4);
+                Peer peer3 = new Peer("peer3", queueBroker3, 3, 4);
 
                 try {
                     Thread.sleep(5000);
@@ -43,10 +45,10 @@ public class Test {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                peer1.multicast(" ", 1);
                 //peer0.multicast("Message " + 0 + " from Peer " + 0,0);
                 //peer1.multicast("Message " + 1 + " from Peer " + 1,1);
-                //peer2.multicast("Message " + 2 + " from Peer " + 2,2);
+                peer2.multicast("Message " + 2 + " from Peer " + 2,2);
+                peer3.multicast("Message " + 3 + " from Peer " + 3,3);
             }
             
         };

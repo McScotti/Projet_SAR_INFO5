@@ -14,11 +14,11 @@ public class Rdv {
         in=null;
         Ccch=null;
         Acch=null;
-        out= new CircularBuffer(5);
+        out= new CircularBuffer(2);
     }
 
     public synchronized CChannel connect_meet() {
-        in = new CircularBuffer(5);
+        in = new CircularBuffer(2);
         Ccch = new CChannel(in, out, broker);
         notifyAll();
         while(Acch==null){

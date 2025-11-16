@@ -95,11 +95,11 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     }
 
     public void listen(MessageQueue queue){
-        System.out.println("j'ai recu un messageeeeee");
         queue.receive(new MessageQueue.Listener() {
 
             @Override
             public void received(byte[] msg) {
+                System.out.println("        Reception d'un message "+id);
                 Object message = MessageSerializer.deserialize(msg);
                 //System.out.println("j'ai recu un message");
                 if(message instanceof MessageACK){
@@ -143,9 +143,15 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     public void deliver(){
         Timestamp mintTimestamp = Collections.min(received_messages.keySet());
         if(PFD.verify_my_acks(received_ack.get(mintTimestamp))){
-            System.out.println(received_messages.get(mintTimestamp).content);
+            System.out.println(received_messages.get(mintTimestamp).content + " "+id);
+            received_messages.remove(mintTimestamp);
+            received_ack.remove(mintTimestamp);
         }else{
-            System.out.println("no deliver");
+            String h = "";
+            for(Integer i:received_ack.get(mintTimestamp)){
+                h = h+" "+i;
+            }
+            System.out.println("no deliver "+id+" "+h);
         }
         
     }
@@ -170,12 +176,10 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
     public void handleACK(MessageACK ack){
         if(received_messages.get(ack.get_timestamp())!=null){
-            if(ack.get_id()!=Peer.this.id){
                 received_ack.get(ack.get_timestamp()).add(ack.get_id());
                 System.out.println("j'ai recu un message");
                 deliver();
-            }
-            System.out.println("j'ai delivre un message");
+            
         }else{
             Runnable R = new Runnable() {
 
@@ -187,6 +191,9 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             };
             EExecutor.instance().post(R);
         }
+        // received_ack.get(ack.get_timestamp()).add(ack.get_id());
+        // System.out.println("j'ai recu un message");
+        // deliver();
     }
 
     public void handleMessage(Message m){
