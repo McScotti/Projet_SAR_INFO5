@@ -32,14 +32,11 @@ public class Peer extends Task implements TotallyOrderedMulticast{
         int i=id+1;
         while(i<Number_of_peer){
             if(i!=id){
-                int j = i;
                 queueBroker.connect("peer"+i, 1000+i+id, new QueueBroker.ConnectListener() {
 
                     @Override
                     public void connected(MessageQueue queue) {
-                        System.out.println("J ai reussi une connexion"+id + "sur" +j);
                         queues.add(queue);
-                        //System.out.println(id + ""+ queues.size());
                         listen(queue);
                     }
 
@@ -71,25 +68,21 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
                 @Override
                 public void run() {
-                    System.out.println("multicast postpone");
                     Peer.this.multicast(msg, id);
                 }
             };
             EExecutor.instance().post(R);
         }else{
-            System.out.println("multicast ");
             Message message = new Message(msg);
             Timestamp timestamp = new Timestamp(this.id, lamportClock.tick());
             message.set_timestamp(timestamp);
             byte[] b = MessageSerializer.serialize(message);
             //queues.get(0).send(b);
             for(MessageQueue q : queues){
-                System.out.println(b.length);
                 q.send(b);
                 //System.out.println("j'ai  ecrit pour un "+id);
             } 
             handleMessage(message);
-            System.out.println("j'ai  ecrit pour un "+id);
         }
         
     }
@@ -99,7 +92,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
             @Override
             public void received(byte[] msg) {
-                System.out.println("        Reception d'un message "+id);
                 Object message = MessageSerializer.deserialize(msg);
                 //System.out.println("j'ai recu un message");
                 if(message instanceof MessageACK){
@@ -130,7 +122,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
             @Override
             public void accepted(MessageQueue queue) {
-                System.out.println("j'ai recu quelqu'un " + i);
                 queues.add(queue);
                 listen(queue);
             }
@@ -151,7 +142,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             for(Integer i:received_ack.get(mintTimestamp)){
                 h = h+" "+i;
             }
-            System.out.println("no deliver "+id+" "+h);
         }
         
     }
@@ -177,7 +167,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     public void handleACK(MessageACK ack){
         if(received_messages.get(ack.get_timestamp())!=null){
                 received_ack.get(ack.get_timestamp()).add(ack.get_id());
-                System.out.println("j'ai recu un message");
                 deliver();
             
         }else{

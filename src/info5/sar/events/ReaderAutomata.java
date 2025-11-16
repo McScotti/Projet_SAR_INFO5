@@ -53,7 +53,6 @@ public class ReaderAutomata {
                             rstate= rState.RECEIVE_MESSAGE;
                             message_bytes = new byte[length];
                             readed=0;
-                            System.out.println("j'ai lu une taille de "+ length);
                         }
                         Runnable r = new Runnable() {
                             public void run(){
