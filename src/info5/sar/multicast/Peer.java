@@ -93,12 +93,13 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             @Override
             public void received(byte[] msg) {
                 Object message = MessageSerializer.deserialize(msg);
-                //System.out.println("j'ai recu un message");
                 if(message instanceof MessageACK){
+                    System.out.println("        j'ai recu un ack   " +id+"  "+ ++acked);
                     MessageACK ack = (MessageACK)message;
                     handleACK(ack);
                     listen(queue);
                 }else if(message instanceof Message){
+                    System.out.println("        j'ai recu un message   " +id+"  "+ ++received);
                     Message m = (Message)message;
                     handleMessage(m);
                     listen(queue);
@@ -209,5 +210,7 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     int id;
 
     QueueBroker queueBroker;
+
+    int received,acked;
     
 }
