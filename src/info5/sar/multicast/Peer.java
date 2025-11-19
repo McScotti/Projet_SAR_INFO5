@@ -42,8 +42,7 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
                     @Override
                     public void refused() {
-                        // TODO Auto-generated method stub
-                        throw new UnsupportedOperationException("Unimplemented method 'refused'");
+                        
                     }
                     
                 });
@@ -57,8 +56,7 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     
     @Override
     public void set(Listener l) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'set'");
+        
     }
 
     @Override
@@ -108,8 +106,7 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
             @Override
             public void closed() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'closed'");
+               
             }
             
         });

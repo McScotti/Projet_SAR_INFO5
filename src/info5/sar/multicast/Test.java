@@ -43,10 +43,10 @@ public class Test {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                peer1.multicast(" ", 1);
+                //peer1.multicast(" ", 1);
                 //peer0.multicast("Message " + 0 + " from Peer " + 0,0);
-                //peer1.multicast("Message " + 1 + " from Peer " + 1,1);
-                //peer2.multicast("Message " + 2 + " from Peer " + 2,2);
+                peer1.multicast("Message " + 1 + " from Peer " + 1,1);
+                peer2.multicast("Message " + 2 + " from Peer " + 2,2);
             }
             
         };
@@ -55,3 +55,34 @@ public class Test {
         EExecutor.instance().run();
     }
 }
+
+/*
+ * 
+ * #from math import nan
+print(df.CabinNumber)
+for i in range(len(df.PilotAge)):
+  if df.PilotAge[i]<25:
+    df.loc[i,"PilotAge"]=pd.NA
+
+for i in range(len(df.MissionCost)):
+  if df.MissionCost[i]<=0:
+    df.loc[i,"MissionCost"]=pd.NA
+
+for i in range(len(df.CabinNumber)):
+  if len(str(df.CabinNumber[i]).split(" "))>1:
+    df.loc[i,"CabinNumber"]=df.isna()
+
+from sklearn.impute import SimpleImputer
+
+imp_mean_pilotage = SimpleImputer(missing_values=np.nan, strategy='mean')
+imp_mean_cost = SimpleImputer(missing_values=np.nan, strategy='mean')
+imp_mean_cabin = SimpleImputer(missing_values=NA, strategy='most_frequent')
+
+#imp_mean_pilotage.fit(df["PilotAge"])
+#imp_mean_cost.fit(df.PilotAge)
+#imp_mean_cabin.fit(df.CabinNumber)
+
+df["PilotAge"] = imp_mean_pilotage.fit_transform(df[["PilotAge"]])
+df["MissionCost"] = imp_mean_cost.fit_transform(df[["MissionCost"]])
+df["CabinNumber"] = imp_mean_cabin.fit_transform(df[["CabinNumber"]])
+ */
