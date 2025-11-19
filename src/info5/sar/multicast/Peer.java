@@ -42,7 +42,8 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
                     @Override
                     public void refused() {
-                        
+                        // TODO Auto-generated method stub
+                        throw new UnsupportedOperationException("Unimplemented method 'refused'");
                     }
                     
                 });
@@ -56,7 +57,8 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     
     @Override
     public void set(Listener l) {
-        
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'set'");
     }
 
     @Override
@@ -91,7 +93,6 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             @Override
             public void received(byte[] msg) {
                 Object message = MessageSerializer.deserialize(msg);
-                //System.out.println("j'ai recu un message");
                 if(message instanceof MessageACK){
                     MessageACK ack = (MessageACK)message;
                     handleACK(ack);
@@ -106,7 +107,8 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
             @Override
             public void closed() {
-               
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'closed'");
             }
             
         });
@@ -134,11 +136,15 @@ public class Peer extends Task implements TotallyOrderedMulticast{
             System.out.println(received_messages.get(mintTimestamp).content + " "+id);
             received_messages.remove(mintTimestamp);
             received_ack.remove(mintTimestamp);
+            if(received_messages.size()>=1){
+                deliver();
+            }
         }else{
             String h = "";
             for(Integer i:received_ack.get(mintTimestamp)){
                 h = h+" "+i;
             }
+            //System.out.println("j n'ai pas pu delivrer ce message: "+received_messages.get(mintTimestamp).content+ " "+this.id);
         }
         
     }
@@ -154,7 +160,7 @@ public class Peer extends Task implements TotallyOrderedMulticast{
 
                 @Override
                 public void closed() {
-                    
+                    PFD.dead(Peer.this.id);
                 }
                 
             });
@@ -206,5 +212,7 @@ public class Peer extends Task implements TotallyOrderedMulticast{
     int id;
 
     QueueBroker queueBroker;
+
+    int received,acked;
     
 }
